@@ -31,8 +31,8 @@
                     optionsContainer = $('<ul class="options"></ul>'),
                     options;
 
-                //cria os options
-                $.each(select.find('option'), function(index, val) {
+                //create options
+                $.each(select.children(), function(index, val) {
                     self.createOptions(val).appendTo(optionsContainer);
                 });
 
@@ -40,7 +40,7 @@
                 optionsContainer.appendTo(newSelect);
 
 
-                // Adiciona selecti no DOM
+                // add selecti DOM
                 select.after(newSelect);
             });
 
@@ -48,48 +48,11 @@
 
         },
 
-        //cria corpo do select
-        createSelect: function(select, Options) {
+        //create options
+        createOptions: function(elm, group) {
             var self = Selecti,
-                $el = $(select),
-                placeholder = '',
-                $placeholder,
-                // $container = '',//div pai
-                // $ul = '';//lista com os options
-                $container = $('<div class="selecti"></div>'),
-                $ul = $('<ul></ul>');
-
-
-            $.each($el, function (i, sel) {
-                //verifica se tem placeholder em data ou setado js e adiciona
-                $placeholder = $(
-                    '<div class="placeholder">'+
-                        (($(sel).attr('placeholder')) ? $(sel).attr('placeholder') : (Options.placeholder.length > 0) ? Options.placeholder : '')+
-                    '</div>');
-
-                $.each($(sel).find('option'), function (j, options) {
-                    $ul.append(self.createOptions(j, options));
-                });
-
-                //cria div com a listagem de options
-                // $placeholder.append(placeholder);
-                $container.append($placeholder);
-                $container.append($ul);
-
-                console.log($container);
-
-                $(sel).after($container);
-            });
-
-
-            return 0;
-        },
-
-        //Cria os options e retorna li com o option
-        createOptions: function(elm) {
-            var self = this,
                 $elm = $(elm);
-            // caso seja single select
+            // single select
             if ($elm.is('option')) {
                 var value = $elm.val(),
                     label = $elm.text(),
@@ -99,6 +62,21 @@
                 $el = $('<li class="option" data-value="'+value+'">'+label+'</li>');
             }
 
+            if ($elm.is('optgroup')) {
+                var label = $elm.attr('label'),
+                    $group = $('<ul></ul>'),
+                    $optgroup = $('<li><div class="optgroup-label">'+label+'</div></li>');
+
+                $.each($elm.children(), function (i, elm) {
+                    $group.append(self.createOptions(elm, $group));
+// $group.append(that.optionToHtml(elm, group));
+                });
+                    console.log($group);
+
+                $group.appendTo($optgroup);
+                $el = $group.html();
+                // return $group.html();
+            }
             return $el;
         },
 
@@ -113,11 +91,11 @@
 
     // Attach the plugin to jQuery namespace.
     $.fn[pluginName] = function(method) {
-        //chama método
+        //call method
         if (Selecti[method]) {
             return Selecti[method].apply(this, Array.prototype.slice.call(arguments, 1));
         }
-        //inicia plugin
+        //init plugin
         else if (typeof method === 'object' || !method) {
             return Selecti.init.apply(this, arguments);
         }
